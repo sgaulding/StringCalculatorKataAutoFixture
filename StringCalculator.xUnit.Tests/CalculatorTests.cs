@@ -99,5 +99,22 @@
             Assert.Equal(smallNumber, actual);
         }
 
+        [Theory, CalculatorTestConventions]
+        public void AddLineWithCustomDelimiterStringReturnsCorrectResult(
+            Calculator sut,
+            string delmiter,
+            int count,
+            Generator<int> intGenerator
+            )
+        {
+            var integers = intGenerator.Take(count + 2).ToArray();
+            var numbers = $"//[{delmiter}]\n{string.Join(delmiter, integers)}";
+            var expected = integers.Sum();
+
+            var actual = sut.Add(numbers);
+
+            Assert.Equal(expected, actual);
+        }
+
     }
 }

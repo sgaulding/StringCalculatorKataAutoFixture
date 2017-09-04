@@ -2,20 +2,24 @@
 {
     using System;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     public class Calculator
     {
         public int Add(string numbers)
         {
             const string DetectDelimiterString = "//";
+            var delimterPatter = new Regex($"{DetectDelimiterString}\\[(.+?)\\]", RegexOptions.Multiline);
 
-            var defaultDelimiters = new[] { ',', '\n' };
+            var defaultDelimiters = new[] { ",", "\n" };
             var numbersOnly = numbers;
             var delimters = defaultDelimiters;
 
             if (numbers.StartsWith(DetectDelimiterString))
             {
-                delimters = new[] { numbers.Skip(2).First() };
+                var match = delimterPatter.Match(numbers);
+                var value = match.Success ? match.Groups[1].Value : numbers.Skip(2).First().ToString();
+                delimters = new[] { value };
                 numbersOnly = new string(numbers.SkipWhile(c => c != '\n').ToArray());
             }
 
