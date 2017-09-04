@@ -9,6 +9,15 @@
     public class CalculatorTests
     {
         [Theory, CalculatorTestConventions]
+        public void AddAnyAmountOfNumbersReturnsCorrectResult(Calculator sut, int count, Generator<int> generator)
+        {
+            var integers = generator.Take(count + 2).ToArray();
+            var numbers = string.Join(",", integers);
+            var actual = sut.Add(numbers);
+            Assert.Equal(integers.Sum(), actual);
+        }
+
+        [Theory, CalculatorTestConventions]
         public void AddEmptyRetursCorrectResults(Calculator sut)
         {
             var numbers = string.Empty;
@@ -33,14 +42,15 @@
         }
 
         [Theory, CalculatorTestConventions]
-        public void AddAnyAmountOfNumbersReturnsCorrectResult(Calculator sut, int count, Generator<int> generator)
+        public void AddWithLineBreakCommaAsDelimitersReturnsCorrectResult(
+            Calculator sut,
+            int firstInt,
+            int secondInt,
+            int thridInt)
         {
-            var integers = generator.Take(count + 2).ToArray();
-            var numbers = string.Join(",", integers);
+            var numbers = $"{firstInt}\n{secondInt},{thridInt}";
             var actual = sut.Add(numbers);
-            Assert.Equal(integers.Sum(), actual);
+            Assert.Equal(firstInt + secondInt + thridInt, actual);
         }
-
-
     }
 }

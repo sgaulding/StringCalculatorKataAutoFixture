@@ -8,7 +8,7 @@
         public int Add(string numbers)
         {
             return numbers
-                .Split(",".ToArray(), StringSplitOptions.RemoveEmptyEntries)
+                .Split(new[] {',', '\n'}, StringSplitOptions.RemoveEmptyEntries)
                 .Select(int.Parse)
                 .Sum();
         }
