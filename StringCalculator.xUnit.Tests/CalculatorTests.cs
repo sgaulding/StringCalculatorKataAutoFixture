@@ -1,5 +1,6 @@
 ﻿namespace StringCalculator.xUnit.Tests
 {
+    using System;
     using System.Linq;
 
     using Ploeh.AutoFixture;
@@ -33,7 +34,7 @@
             int count,
             Generator<int> intGenerator)
         {
-            var delimiter = charGenerator.First(c => !int.TryParse(c.ToString(), out var dummy));
+            var delimiter = charGenerator.Where(c => c != '-').First(c => !int.TryParse(c.ToString(), out var dummy));
             var integers = intGenerator.Take(count + 2).ToArray();
             var numbersWithDelimiter = string.Join(delimiter.ToString(), integers);
             var numbers = $"//{delimiter}\n{numbersWithDelimiter}";
@@ -71,5 +72,32 @@
             var actual = sut.Add(numbers);
             Assert.Equal(firstInt + secondInt + thridInt, actual);
         }
+
+        [Theory, CalculatorTestConventions]
+        public void AddLineWithNegativeNumbersThowsCorrectException(
+            Calculator sut,
+            int firstInt,
+            int secondInt,
+            int thridInt)
+        {
+            var numbers = string.Join(",", -firstInt, secondInt, -thridInt);
+            var exeption = Assert.Throws<ArgumentOutOfRangeException>(() => sut.Add(numbers));
+            Assert.True(exeption.Message.StartsWith("Negatives not allowed."));
+            Assert.Contains((-firstInt).ToString(), exeption.Message);
+            Assert.Contains((-thridInt).ToString(), exeption.Message);
+        }
+
+        [Theory, CalculatorTestConventions]
+        public void AddIgnoresBigNumbers(Calculator sut, int smallSeed, int bigSeed)
+        {
+            var smallNumber = Math.Min(smallSeed, 1000);
+            var largeNumber = bigSeed + 1000;
+            var numbers = string.Join(",", smallSeed, largeNumber);
+
+            var actual = sut.Add(numbers);
+
+            Assert.Equal(smallNumber, actual);
+        }
+
     }
 }

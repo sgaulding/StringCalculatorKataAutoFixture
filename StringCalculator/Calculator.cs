@@ -19,7 +19,18 @@
                 numbersOnly = new string(numbers.SkipWhile(c => c != '\n').ToArray());
             }
 
-            return numbersOnly.Split(delimters, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).Sum();
+            var numbersToSum = numbersOnly.Split(delimters, StringSplitOptions.RemoveEmptyEntries).Select(int.Parse)
+                .ToArray();
+
+            var negativeNumbers = numbersToSum.Where(num => num < 0).ToArray();
+            if (negativeNumbers.Any())
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(numbers),
+                    $"Negatives not allowed. Negatives in numbers:\n{string.Join("\n", negativeNumbers)}");
+            }
+
+            return numbersToSum.Where(i => i < 1000).Sum();
         }
     }
 }
