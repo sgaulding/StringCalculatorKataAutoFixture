@@ -1,5 +1,9 @@
 ﻿namespace StringCalculator.xUnit.Tests
 {
+    using System.Linq;
+
+    using Ploeh.AutoFixture;
+
     using Xunit;
 
     public class CalculatorTests
@@ -27,5 +31,16 @@
             var actual = sut.Add(numbers);
             Assert.Equal(firstInt + secondInt, actual);
         }
+
+        [Theory, CalculatorTestConventions]
+        public void AddAnyAmountOfNumbersReturnsCorrectResult(Calculator sut, int count, Generator<int> generator)
+        {
+            var integers = generator.Take(count + 2).ToArray();
+            var numbers = string.Join(",", integers);
+            var actual = sut.Add(numbers);
+            Assert.Equal(integers.Sum(), actual);
+        }
+
+
     }
 }
