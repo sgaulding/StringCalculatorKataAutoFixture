@@ -27,6 +27,34 @@
             Assert.Equal(0, actual);
         }
 
+        [Theory, CalculatorTestConventions]
+        public void AddIgnoresBigNumbers(Calculator sut, int smallSeed, int bigSeed)
+        {
+            var smallNumber = Math.Min(smallSeed, 1000);
+            var largeNumber = bigSeed + 1000;
+            var numbers = string.Join(",", smallSeed, largeNumber);
+
+            var actual = sut.Add(numbers);
+
+            Assert.Equal(smallNumber, actual);
+        }
+
+        [Theory, CalculatorTestConventions]
+        public void AddLineWithCustomDelimiterStringReturnsCorrectResult(
+            Calculator sut,
+            string delmiter,
+            int count,
+            Generator<int> intGenerator)
+        {
+            var integers = intGenerator.Take(count + 2).ToArray();
+            var numbers = $"//[{delmiter}]\n{string.Join(delmiter, integers)}";
+            var expected = integers.Sum();
+
+            var actual = sut.Add(numbers);
+
+            Assert.Equal(expected, actual);
+        }
+
         [Theory, AutoData]
         public void AddLineWithCustomDelimterReturnsCorrectResult(
             Calculator sut,
@@ -43,6 +71,40 @@
             var actual = sut.Add(numbers);
 
             Assert.Equal(expected, actual);
+        }
+
+        [Theory, CalculatorTestConventions]
+        public void AddLineWithMultipleCustomDelimiterStringReturnsCorrectResult(
+            Calculator sut,
+            string delmiter1,
+            string delmiter2,
+            int count,
+            Generator<int> intGenerator)
+        {
+            var first = intGenerator.First();
+            var second = intGenerator.Skip(1).First();
+            var third = intGenerator.Skip(2).First();
+
+            var numbers = $"//[{delmiter1}][{delmiter2}]\n{first}{delmiter2}{second}{delmiter1}{third}";
+            var expected = first + second + third;
+
+            var actual = sut.Add(numbers);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory, CalculatorTestConventions]
+        public void AddLineWithNegativeNumbersThowsCorrectException(
+            Calculator sut,
+            int firstInt,
+            int secondInt,
+            int thridInt)
+        {
+            var numbers = string.Join(",", -firstInt, secondInt, -thridInt);
+            var exeption = Assert.Throws<ArgumentOutOfRangeException>(() => sut.Add(numbers));
+            Assert.True(exeption.Message.StartsWith("Negatives not allowed."));
+            Assert.Contains((-firstInt).ToString(), exeption.Message);
+            Assert.Contains((-thridInt).ToString(), exeption.Message);
         }
 
         [Theory, CalculatorTestConventions]
@@ -72,68 +134,5 @@
             var actual = sut.Add(numbers);
             Assert.Equal(firstInt + secondInt + thridInt, actual);
         }
-
-        [Theory, CalculatorTestConventions]
-        public void AddLineWithNegativeNumbersThowsCorrectException(
-            Calculator sut,
-            int firstInt,
-            int secondInt,
-            int thridInt)
-        {
-            var numbers = string.Join(",", -firstInt, secondInt, -thridInt);
-            var exeption = Assert.Throws<ArgumentOutOfRangeException>(() => sut.Add(numbers));
-            Assert.True(exeption.Message.StartsWith("Negatives not allowed."));
-            Assert.Contains((-firstInt).ToString(), exeption.Message);
-            Assert.Contains((-thridInt).ToString(), exeption.Message);
-        }
-
-        [Theory, CalculatorTestConventions]
-        public void AddIgnoresBigNumbers(Calculator sut, int smallSeed, int bigSeed)
-        {
-            var smallNumber = Math.Min(smallSeed, 1000);
-            var largeNumber = bigSeed + 1000;
-            var numbers = string.Join(",", smallSeed, largeNumber);
-
-            var actual = sut.Add(numbers);
-
-            Assert.Equal(smallNumber, actual);
-        }
-
-        [Theory, CalculatorTestConventions]
-        public void AddLineWithCustomDelimiterStringReturnsCorrectResult(
-            Calculator sut,
-            string delmiter,
-            int count,
-            Generator<int> intGenerator)
-        {
-            var integers = intGenerator.Take(count + 2).ToArray();
-            var numbers = $"//[{delmiter}]\n{string.Join(delmiter, integers)}";
-            var expected = integers.Sum();
-
-            var actual = sut.Add(numbers);
-
-            Assert.Equal(expected, actual);
-        }
-
-        [Theory, CalculatorTestConventions]
-        public void AddLineWithMultipleCustomDelimiterStringReturnsCorrectResult(
-            Calculator sut,
-            string delmiter1,
-            string delmiter2,
-            int count,
-            Generator<int> intGenerator)
-        {
-            var first = intGenerator.First();
-            var second = intGenerator.Skip(1).First();
-            var third = intGenerator.Skip(2).First();
-            
-            var numbers = $"//[{delmiter1}][{delmiter2}]\n{first}{delmiter2}{second}{delmiter1}{third}";
-            var expected = first + second + third;
-
-            var actual = sut.Add(numbers);
-
-            Assert.Equal(expected, actual);
-        }
-
     }
 }
