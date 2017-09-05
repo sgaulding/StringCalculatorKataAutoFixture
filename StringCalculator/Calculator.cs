@@ -1,6 +1,7 @@
 ﻿namespace StringCalculator
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -8,8 +9,13 @@
     {
         public int Add(string numbers)
         {
+            string[] ExtractDelimiters(MatchCollection matchCollection)
+            {
+                return (from Match match in matchCollection select match.Groups[1].Value).ToArray();
+            }
+
             const string DetectDelimiterString = "//";
-            var delimterPatter = new Regex($"{DetectDelimiterString}\\[(.+?)\\]", RegexOptions.Multiline);
+            var delimterPatter = new Regex(@"\[(.+?)\]", RegexOptions.Multiline);
 
             var defaultDelimiters = new[] { ",", "\n" };
             var numbersOnly = numbers;
@@ -17,9 +23,10 @@
 
             if (numbers.StartsWith(DetectDelimiterString))
             {
-                var match = delimterPatter.Match(numbers);
-                var value = match.Success ? match.Groups[1].Value : numbers.Skip(2).First().ToString();
-                delimters = new[] { value };
+                var matchCollection = delimterPatter.Matches(numbers);
+                delimters = matchCollection.Count == 0
+                                ? new[] { numbers.Skip(2).First().ToString() }
+                                : ExtractDelimiters(matchCollection);
                 numbersOnly = new string(numbers.SkipWhile(c => c != '\n').ToArray());
             }
 

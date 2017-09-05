@@ -104,12 +104,31 @@
             Calculator sut,
             string delmiter,
             int count,
-            Generator<int> intGenerator
-            )
+            Generator<int> intGenerator)
         {
             var integers = intGenerator.Take(count + 2).ToArray();
             var numbers = $"//[{delmiter}]\n{string.Join(delmiter, integers)}";
             var expected = integers.Sum();
+
+            var actual = sut.Add(numbers);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory, CalculatorTestConventions]
+        public void AddLineWithMultipleCustomDelimiterStringReturnsCorrectResult(
+            Calculator sut,
+            string delmiter1,
+            string delmiter2,
+            int count,
+            Generator<int> intGenerator)
+        {
+            var first = intGenerator.First();
+            var second = intGenerator.Skip(1).First();
+            var third = intGenerator.Skip(2).First();
+            
+            var numbers = $"//[{delmiter1}][{delmiter2}]\n{first}{delmiter2}{second}{delmiter1}{third}";
+            var expected = first + second + third;
 
             var actual = sut.Add(numbers);
 
